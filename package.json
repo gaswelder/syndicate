@@ -1,0 +1,20 @@
+{
+  "name": "rssmail",
+  "version": "0.1.1",
+  "description": "Forwards RSS items to email",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "rss",
+    "email"
+  ],
+  "author": "gaswelder",
+  "license": "MIT",
+  "dependencies": {
+    "nodemailer": "^4.6.8",
+    "rss-parser": "^3.4.3"
+  },
+  "devDependencies": {}
+}
