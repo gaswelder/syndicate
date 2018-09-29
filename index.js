@@ -113,22 +113,30 @@ function send(message, feed, config) {
     log(subject);
     const mail = Object.assign({}, config.mailer.mail, {
       subject,
-      html: itemContent(message)
+      html: composeMail(message)
     });
-
-    if (message.enclosure) {
-      const f = message.enclosure;
-      mail.html =
-        `<h2>The enclosure</h2>
-      <p><a href="${f.url}">${f.url}</a></p>
-      ` + mail.html;
-    }
 
     transporter.sendMail(mail, (error, info) => {
       if (error) return fail(error);
       ok(info);
     });
   });
+}
+
+// Returns HTML email body for the given RSS item.
+function composeMail(item) {
+  const parts = [];
+  if (item.link) {
+    parts.push(
+      `<h2>Post link</h2><p><a href="${item.link}">${item.link}</a></p>`
+    );
+  }
+  if (item.enclosure) {
+    const f = item.enclosure;
+    parts.push(`<h2>Enclosure</h2><p><a href="${f.url}">${f.url}</a></p>`);
+  }
+  parts.push(itemContent(item));
+  return parts.join("");
 }
 
 function itemContent(item) {
