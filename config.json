@@ -1,0 +1,14 @@
+{
+  "mailer": {
+    "transport": {
+      "host": "localhost",
+      "port": 2525,
+      "secure": false
+    },
+    "mail": {
+      "from": "Sindycate <no@localhost>",
+      "to": "joe@localhost"
+    }
+  },
+  "feeds": ["http://feeds.twit.tv/sn.xml"]
+}

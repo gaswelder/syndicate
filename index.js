@@ -1,13 +1,13 @@
 const rssParser = require("rss-parser");
 const nodemailer = require("nodemailer");
+const config = require("./config.json");
 
 const sleep = ms => new Promise(done => setTimeout(done, ms));
 
 // The main function just launches a separate tracker
 // for each defined RSS feed.
 function main() {
-  const subs = ["http://feeds.twit.tv/sn.xml"];
-  subs.forEach(track);
+  config.feeds.forEach(track);
 }
 
 const sent = [];
@@ -32,18 +32,12 @@ async function track(sub) {
 function send(message) {
   return new Promise((ok, fail) => {
     console.log("send", message.title);
-    const transporter = nodemailer.createTransport({
-      host: "localhost",
-      port: 2525,
-      secure: false
-    });
+    const transporter = nodemailer.createTransport(config.mailer.transport);
 
-    const mail = {
-      from: '"Sindycate" <no@localhost>',
-      to: "joe@localhost",
+    const mail = Object.assign({}, config.mailer.mail, {
       subject: message.title,
       html: message.content
-    };
+    });
 
     if (message.enclosure) {
       const f = message.enclosure;
