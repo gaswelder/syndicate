@@ -37,18 +37,35 @@ class SendLog {
   }
 }
 
+function stamp() {
+  return new Date()
+    .toISOString()
+    .split(".")[0]
+    .replace("T", " ");
+}
+
+function log(msg) {
+  process.stdout.write(stamp() + "\t" + msg + "\n");
+}
+
 // The main function just launches a separate tracker
 // for each defined RSS feed.
 function main() {
   const config = JSON.parse(fs.readFileSync("./config.json").toString());
-  const log = new SendLog(config.sendlog_path);
+  const sendlog = new SendLog(config.sendlog_path);
   for (const sub of config.feeds) {
-    track(sub, config, log);
+    track(sub, config, sendlog);
   }
 }
 
+function itemID(item) {
+  const id = item.guid || item.id;
+  if (!id) throw new Error("can't find message id in the data");
+  return id;
+}
+
 // A tracker function for a single feed.
-async function track(sub, config, log) {
+async function track(sub, config, sendlog) {
   for (;;) {
     const parser = new rssParser({
       headers: {
@@ -56,14 +73,13 @@ async function track(sub, config, log) {
       }
     });
     const rss = await parser.parseURL(sub);
-    for (const item of rss.items) {
-      const id = item.guid || item.id;
-      if (!id) throw new Error("can't find message id in the data");
-      if (log.has(id)) {
-        continue;
-      }
+    const newItems = rss.items.filter(function(item) {
+      return !sendlog.has(itemID(item));
+    });
+    log(`${rss.title}: ${newItems.length} new`);
+    for (const item of newItems) {
       await send(item, rss, config);
-      log.add(id);
+      sendlog.add(itemID(item));
     }
     await sleep(100000);
   }
@@ -74,7 +90,7 @@ function send(message, feed, config) {
   return new Promise((ok, fail) => {
     const transporter = nodemailer.createTransport(config.mailer.transport);
     const subject = `${feed.title}: ${message.title}`;
-    console.log(subject);
+    log(subject);
     const mail = Object.assign({}, config.mailer.mail, {
       subject,
       html: message.content
