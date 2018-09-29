@@ -56,11 +56,13 @@ async function track(sub) {
     });
     const rss = await parser.parseURL(sub);
     for (const item of rss.items) {
-      if (log.has(item.guid)) {
+      const id = item.guid || item.id;
+      if (!id) throw new Error("can't find message id in the data");
+      if (log.has(id)) {
         continue;
       }
       await send(item);
-      log.add(item.guid);
+      log.add(id);
     }
     await sleep(100000);
   }
