@@ -1,8 +1,44 @@
 const rssParser = require("rss-parser");
 const nodemailer = require("nodemailer");
 const config = require("./config.json");
+const fs = require("fs");
 
 const sleep = ms => new Promise(done => setTimeout(done, ms));
+
+class SendLog {
+  constructor(filepath) {
+    this.filepath = filepath;
+    this.load();
+  }
+
+  load() {
+    if (!fs.existsSync(this.filepath)) {
+      this.set = new Set();
+      return;
+    }
+    const items = fs
+      .readFileSync(this.filepath)
+      .toString()
+      .split("\n");
+    this.set = new Set(items);
+  }
+
+  flush() {
+    const keys = [...this.set.keys()];
+    fs.writeFileSync(this.filepath, keys.join("\n"));
+  }
+
+  has(key) {
+    return this.set.has(key);
+  }
+
+  add(key) {
+    this.set.add(key);
+    this.flush();
+  }
+}
+
+const log = new SendLog(config.sendlog_path);
 
 // The main function just launches a separate tracker
 // for each defined RSS feed.
@@ -10,20 +46,17 @@ function main() {
   config.feeds.forEach(track);
 }
 
-const sent = [];
-
-function unsent(item) {
-  return sent.indexOf(item.guid) == -1;
-}
-
 // A tracker function for a single feed.
 async function track(sub) {
   for (;;) {
     const rss = await new rssParser().parseURL(sub);
-    rss.items
-      .filter(unsent)
-      .slice(0, 1)
-      .forEach(send);
+    for (const item of rss.items) {
+      if (log.has(item.guid)) {
+        continue;
+      }
+      await send(item);
+      log.add(item.guid);
+    }
     await sleep(100000);
   }
 }
@@ -49,7 +82,6 @@ function send(message) {
 
     transporter.sendMail(mail, (error, info) => {
       if (error) return fail(error);
-      sent.push(message.guid);
       ok(info);
     });
   });
