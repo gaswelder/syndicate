@@ -82,6 +82,9 @@ async function updateFeed(sub, config, sendlog) {
   const parser = new rssParser({
     headers: {
       Accept: "application/rss+xml, application/xml"
+    },
+    customFields: {
+      item: ["summary"]
     }
   });
   const rss = await parser.parseURL(sub);
@@ -110,7 +113,7 @@ function send(message, feed, config) {
     log(subject);
     const mail = Object.assign({}, config.mailer.mail, {
       subject,
-      html: message.content
+      html: itemContent(message)
     });
 
     if (message.enclosure) {
@@ -126,6 +129,12 @@ function send(message, feed, config) {
       ok(info);
     });
   });
+}
+
+function itemContent(item) {
+  if (item.content) return item.content;
+  if (item.summary) return item.summary._;
+  return "";
 }
 
 main();
