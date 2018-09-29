@@ -1,6 +1,5 @@
 const rssParser = require("rss-parser");
 const nodemailer = require("nodemailer");
-const config = require("./config.json");
 const fs = require("fs");
 
 const sleep = ms => new Promise(done => setTimeout(done, ms));
@@ -38,16 +37,18 @@ class SendLog {
   }
 }
 
-const log = new SendLog(config.sendlog_path);
-
 // The main function just launches a separate tracker
 // for each defined RSS feed.
 function main() {
-  config.feeds.forEach(track);
+  const config = JSON.parse(fs.readFileSync("./config.json").toString());
+  const log = new SendLog(config.sendlog_path);
+  for (const sub of config.feeds) {
+    track(sub, config, log);
+  }
 }
 
 // A tracker function for a single feed.
-async function track(sub) {
+async function track(sub, config, log) {
   for (;;) {
     const parser = new rssParser({
       headers: {
@@ -61,7 +62,7 @@ async function track(sub) {
       if (log.has(id)) {
         continue;
       }
-      await send(item, rss);
+      await send(item, rss, config);
       log.add(id);
     }
     await sleep(100000);
@@ -69,7 +70,7 @@ async function track(sub) {
 }
 
 // title, link, pubDate, content, enclosure{url, length, type}
-function send(message, feed) {
+function send(message, feed, config) {
   return new Promise((ok, fail) => {
     const transporter = nodemailer.createTransport(config.mailer.transport);
     const subject = `${feed.title}: ${message.title}`;
