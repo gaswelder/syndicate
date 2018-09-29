@@ -61,7 +61,7 @@ async function track(sub) {
       if (log.has(id)) {
         continue;
       }
-      await send(item);
+      await send(item, rss);
       log.add(id);
     }
     await sleep(100000);
@@ -69,13 +69,13 @@ async function track(sub) {
 }
 
 // title, link, pubDate, content, enclosure{url, length, type}
-function send(message) {
+function send(message, feed) {
   return new Promise((ok, fail) => {
-    console.log("send", message.title);
     const transporter = nodemailer.createTransport(config.mailer.transport);
-
+    const subject = `${feed.title}: ${message.title}`;
+    console.log(subject);
     const mail = Object.assign({}, config.mailer.mail, {
-      subject: message.title,
+      subject,
       html: message.content
     });
 
