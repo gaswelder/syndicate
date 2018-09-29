@@ -58,13 +58,7 @@ function main() {
   }
 }
 
-function itemID(item) {
-  const id = item.guid || item.id;
-  if (!id) throw new Error("can't find message id in the data");
-  return id;
-}
-
-// A tracker function for a single feed.
+// Continuously tracks a single feed.
 async function track(sub, config, sendlog) {
   for (;;) {
     try {
@@ -79,6 +73,8 @@ async function track(sub, config, sendlog) {
   }
 }
 
+// Makes a single update from the given feed,
+// sending the new items to the email.
 async function updateFeed(sub, config, sendlog) {
   // Some servers insist that they serve application/xml
   // and return 406 error (content mismatch) for the parser's
@@ -97,6 +93,13 @@ async function updateFeed(sub, config, sendlog) {
     await send(item, rss, config);
     sendlog.add(itemID(item));
   }
+}
+
+// Returns the feed item's stable identifier.
+function itemID(item) {
+  const id = item.guid || item.id;
+  if (!id) throw new Error("can't find message id in the data");
+  return id;
 }
 
 // title, link, pubDate, content, enclosure{url, length, type}
