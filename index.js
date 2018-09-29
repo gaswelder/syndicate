@@ -67,7 +67,11 @@ function itemID(item) {
 // A tracker function for a single feed.
 async function track(sub, config, sendlog) {
   for (;;) {
-    await updateFeed(sub, config, sendlog);
+    try {
+      await updateFeed(sub, config, sendlog);
+    } catch (error) {
+      log(`error: ${sub}: ${error.message}`);
+    }
 
     // Spread feed updates in time to avoid load spikes.
     const delay = Math.round((12 + (Math.random() - 0.5)) * 100) / 100;
