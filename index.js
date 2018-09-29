@@ -81,7 +81,10 @@ async function track(sub, config, sendlog) {
       await send(item, rss, config);
       sendlog.add(itemID(item));
     }
-    await sleep(100000);
+
+    // Spread feed updates in time to avoid load spikes.
+    const delay = Math.round((12 + (Math.random() - 0.5)) * 100) / 100;
+    await sleep(delay * 3600 * 1000);
   }
 }
 
