@@ -49,7 +49,12 @@ function main() {
 // A tracker function for a single feed.
 async function track(sub) {
   for (;;) {
-    const rss = await new rssParser().parseURL(sub);
+    const parser = new rssParser({
+      headers: {
+        Accept: "application/rss+xml, application/xml"
+      }
+    });
+    const rss = await parser.parseURL(sub);
     for (const item of rss.items) {
       if (log.has(item.guid)) {
         continue;
