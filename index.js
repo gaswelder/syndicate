@@ -67,24 +67,31 @@ function itemID(item) {
 // A tracker function for a single feed.
 async function track(sub, config, sendlog) {
   for (;;) {
-    const parser = new rssParser({
-      headers: {
-        Accept: "application/rss+xml, application/xml"
-      }
-    });
-    const rss = await parser.parseURL(sub);
-    const newItems = rss.items.filter(function(item) {
-      return !sendlog.has(itemID(item));
-    });
-    log(`${rss.title}: ${newItems.length} new`);
-    for (const item of newItems) {
-      await send(item, rss, config);
-      sendlog.add(itemID(item));
-    }
+    await updateFeed(sub, config, sendlog);
 
     // Spread feed updates in time to avoid load spikes.
     const delay = Math.round((12 + (Math.random() - 0.5)) * 100) / 100;
     await sleep(delay * 3600 * 1000);
+  }
+}
+
+async function updateFeed(sub, config, sendlog) {
+  // Some servers insist that they serve application/xml
+  // and return 406 error (content mismatch) for the parser's
+  // default application/rss+xml.
+  const parser = new rssParser({
+    headers: {
+      Accept: "application/rss+xml, application/xml"
+    }
+  });
+  const rss = await parser.parseURL(sub);
+  const newItems = rss.items.filter(function(item) {
+    return !sendlog.has(itemID(item));
+  });
+  log(`${rss.title}: ${newItems.length} new`);
+  for (const item of newItems) {
+    await send(item, rss, config);
+    sendlog.add(itemID(item));
   }
 }
 
