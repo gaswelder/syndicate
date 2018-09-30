@@ -113,6 +113,9 @@ function send(message, feed, config) {
     log(subject);
     const mail = Object.assign({}, config.mailer.mail, {
       subject,
+      headers: {
+        Date: message.pubDate
+      },
       html: composeMail(message)
     });
 
