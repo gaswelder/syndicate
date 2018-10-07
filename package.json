@@ -1,11 +1,11 @@
 {
-  "name": "rssmail",
+  "name": "syndicate",
   "version": "0.1.1",
   "description": "Forwards RSS items to email",
   "homepage": "https://github.com/gaswelder/syndicate",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha test.js"
   },
   "keywords": [
     "rss",
