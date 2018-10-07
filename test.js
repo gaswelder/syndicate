@@ -11,6 +11,7 @@ const feeds = [
 describe("should get non-empty list for every feed", function() {
   for (const f of feeds) {
     it(f.url, async function() {
+      this.timeout(10000);
       const items = await f.list();
       assert.ok(items.length > 0);
     });
