@@ -24,13 +24,11 @@ class FeedItem {
     const item = this.data;
     const parts = [];
     if (item.link) {
-      parts.push(
-        `<h2>Post link</h2><p><a href="${item.link}">${item.link}</a></p>`
-      );
+      parts.push(`<p>Post link: <a href="${item.link}">${item.link}</a></p>`);
     }
     if (item.enclosure) {
       const f = item.enclosure;
-      parts.push(`<h2>Enclosure</h2><p><a href="${f.url}">${f.url}</a></p>`);
+      parts.push(`<p>Enclosure: <a href="${f.url}">${f.url}</a></p>`);
     }
     parts.push(itemContent(item));
     return parts.join("");
