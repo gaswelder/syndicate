@@ -6,7 +6,11 @@ class FeedItem {
   // Returns the feed item's stable identifier.
   id() {
     const item = this.data;
-    const id = item.guid || item.id;
+    const onlyString = x => (typeof x == "string" ? x : null);
+    const id = [item.guid, item.id, item.link]
+      .map(onlyString)
+      .filter(x => x)[0];
+
     if (!id) throw new Error("can't find message id in the data");
     return id;
   }
