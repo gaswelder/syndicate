@@ -17,5 +17,7 @@
     "nodemailer": "^4.6.8",
     "rss-parser": "^3.4.3"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "mocha": "^5.2.0"
+  }
 }

@@ -1,6 +1,6 @@
-const rssParser = require("rss-parser");
 const nodemailer = require("nodemailer");
 const fs = require("fs");
+const Feed = require("./feed");
 const SendLog = require("./sendlog");
 
 const sleep = ms => new Promise(done => setTimeout(done, ms));
@@ -44,47 +44,31 @@ async function track(sub, config, sendlog) {
 // Makes a single update from the given feed,
 // sending the new items to the email.
 async function updateFeed(sub, config, sendlog) {
-  // Some servers insist that they serve application/xml
-  // and return 406 error (content mismatch) for the parser's
-  // default application/rss+xml.
-  const parser = new rssParser({
-    headers: {
-      Accept: "application/rss+xml, application/xml"
-    },
-    customFields: {
-      item: ["summary"]
-    }
-  });
-  const rss = await parser.parseURL(sub);
-  const newItems = rss.items.filter(function(item) {
-    return !sendlog.has(itemID(item));
-  });
-  log(`${rss.title}: ${newItems.length} new`);
-  for (const item of newItems) {
-    await send(item, rss, config);
-    sendlog.add(itemID(item));
-  }
-}
+  const feed = new Feed(sub);
+  const items = await feed.list();
 
-// Returns the feed item's stable identifier.
-function itemID(item) {
-  const id = item.guid || item.id;
-  if (!id) throw new Error("can't find message id in the data");
-  return id;
+  const newItems = items.filter(function(item) {
+    return !sendlog.has(item.id());
+  });
+  log(`${await feed.title()}: ${newItems.length} new`);
+  for (const item of newItems) {
+    await send(item, feed, config);
+    sendlog.add(item.id());
+  }
 }
 
 // title, link, pubDate, content, enclosure{url, length, type}
 function send(message, feed, config) {
-  return new Promise((ok, fail) => {
+  return new Promise(async (ok, fail) => {
     const transporter = nodemailer.createTransport(config.mailer.transport);
-    const subject = `${feed.title}: ${message.title}`;
+    const subject = `${await feed.title()}: ${message.title()}`;
     log(subject);
     const mail = Object.assign({}, config.mailer.mail, {
       subject,
       headers: {
         Date: message.pubDate
       },
-      html: composeMail(message)
+      html: message.toHTML()
     });
 
     transporter.sendMail(mail, (error, info) => {
@@ -92,28 +76,6 @@ function send(message, feed, config) {
       ok(info);
     });
   });
-}
-
-// Returns HTML email body for the given RSS item.
-function composeMail(item) {
-  const parts = [];
-  if (item.link) {
-    parts.push(
-      `<h2>Post link</h2><p><a href="${item.link}">${item.link}</a></p>`
-    );
-  }
-  if (item.enclosure) {
-    const f = item.enclosure;
-    parts.push(`<h2>Enclosure</h2><p><a href="${f.url}">${f.url}</a></p>`);
-  }
-  parts.push(itemContent(item));
-  return parts.join("");
-}
-
-function itemContent(item) {
-  if (item.content) return item.content;
-  if (item.summary) return item.summary._;
-  return "";
 }
 
 module.exports = main;
