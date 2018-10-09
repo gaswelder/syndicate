@@ -19,12 +19,24 @@ class FeedItem {
     return this.data.title;
   }
 
+  link() {
+    const link = this.data.link;
+    // Some feeds omit schema from the URL.
+    // In that case assume https.
+    if (link.startsWith("//")) {
+      return "https:" + link;
+    }
+    return link;
+  }
+
   // Returns HTML email body for the given RSS item.
   toHTML() {
     const item = this.data;
     const parts = [];
     if (item.link) {
-      parts.push(`<p>Post link: <a href="${item.link}">${item.link}</a></p>`);
+      parts.push(
+        `<p>Post link: <a href="${this.link()}">${this.link()}</a></p>`
+      );
     }
     if (item.enclosure) {
       const f = item.enclosure;

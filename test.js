@@ -30,3 +30,13 @@ describe("item id", function() {
     assert.strictEqual(ids.length, new Set(ids).size);
   });
 });
+
+describe("item", function() {
+  it("should have canonical url", async function() {
+    const feed = new Feed("http://blog.golang.org/feed.atom");
+    const items = await feed.list();
+    for (const item of items) {
+      assert.ok(item.link().startsWith("https://"));
+    }
+  });
+});
