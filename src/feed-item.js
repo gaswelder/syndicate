@@ -19,6 +19,11 @@ class FeedItem {
     return this.data.title;
   }
 
+  attachment() {
+    if (!this.data.enclosure) return null;
+    return this.data.enclosure;
+  }
+
   link() {
     const link = this.data.link;
     // Some feeds omit schema from the URL.

@@ -39,4 +39,10 @@ describe("item", function() {
       assert.ok(item.link().startsWith("https://"));
     }
   });
+
+  it("should return attachment url", async function() {
+    const feed = new Feed("http://feeds.feedburner.com/se-radio");
+    const items = await feed.list();
+    assert.ok(items.some(i => i.attachment() !== null));
+  });
 });
