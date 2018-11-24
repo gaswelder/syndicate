@@ -16,7 +16,7 @@ class Feed {
           Accept: "application/rss+xml, application/xml"
         },
         customFields: {
-          item: ["summary"]
+          item: ["summary", ["category", "categories", { keepArray: true }]]
         }
       });
       this.cache = await parser.parseURL(this.url);

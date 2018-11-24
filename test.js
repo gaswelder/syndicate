@@ -45,4 +45,20 @@ describe("item", function() {
     const items = await feed.list();
     assert.ok(items.some(i => i.attachment() !== null));
   });
+
+  it("should return tags", async function() {
+    const feed = feeds[0];
+    const items = await feed.list();
+    const tags = items[0].tags();
+    assert.ok(Array.isArray(tags));
+    assert.ok(tags.length > 0);
+  });
+
+  it("should return an html rendering", async function() {
+    const feed = feeds[0];
+    const items = await feed.list();
+    const post = items[0];
+    const html = post.toHTML();
+    assert.ok(html.indexOf("<p>Tags:") > 0);
+  });
 });

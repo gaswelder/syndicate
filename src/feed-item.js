@@ -34,6 +34,12 @@ class FeedItem {
     return link;
   }
 
+  // Returns the post's tags, if any, as array of strings.
+  tags() {
+    if (!this.data.categories) return [];
+    return this.data.categories.map(e => (e.$ ? e.$.term : e));
+  }
+
   // Returns HTML email body for the given RSS item.
   toHTML() {
     const item = this.data;
@@ -42,6 +48,9 @@ class FeedItem {
       parts.push(
         `<p>Post link: <a href="${this.link()}">${this.link()}</a></p>`
       );
+    }
+    if (this.tags()) {
+      parts.push(`<p>Tags: ${this.tags().join(", ")}</p>`);
     }
     if (item.enclosure) {
       const f = item.enclosure;
