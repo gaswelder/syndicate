@@ -2,6 +2,7 @@ const nodemailer = require("nodemailer");
 const fs = require("fs");
 const Feed = require("./feed");
 const SendLog = require("./sendlog");
+const args = require("./args");
 
 const sleep = ms => new Promise(done => setTimeout(done, ms));
 
@@ -35,42 +36,44 @@ const time = {
   Hour: 3600 * 1000
 };
 
-// The main function just launches a separate tracker
-// for each defined RSS feed.
-async function main() {
-  let config = readConfig();
-  let feeds = readFeeds();
-  const sendlog = new SendLog(config.sendlog_path);
+function main() {
+  args.flag("a", "update all feeds on startup").parse(async function(params) {
+    let config = readConfig();
+    let feeds = readFeeds();
+    const sendlog = new SendLog(config.sendlog_path);
 
-  // First update all feeds at once.
-  for (const feed of feeds) {
-    await updateFeed(feed, config, sendlog);
-  }
-
-  // Reread the feeds list from time to time so that we don't
-  // have to stop the process to add or remove a feed.
-  setInterval(function() {
-    feeds = readFeeds();
-  }, 10 * time.Minute);
-
-  // Distribute all feeds in time so that each is updated on its
-  // own time, but with the same interval.
-  let currentIndex = -1;
-  for (;;) {
-    if (feeds.length == 0) {
-      process.stderr.write("No feeds to process.\n");
-      process.exit(1);
+    // Update all feeds at once if the flag is given.
+    if (params.a) {
+      for (const feed of feeds) {
+        await updateFeed(feed, config, sendlog);
+      }
     }
-    await sleep((12 * time.Minute) / feeds.length);
-    currentIndex = (currentIndex + 1) % feeds.length;
-    const sub = feeds[currentIndex];
-    log(`updading ${sub}`);
-    try {
-      await updateFeed(sub, config, sendlog);
-    } catch (error) {
-      log(`error: ${sub}: ${error.message}`);
+
+    // Reread the feeds list from time to time so that we don't
+    // have to stop the process to add or remove a feed.
+    setInterval(function() {
+      feeds = readFeeds();
+    }, 10 * time.Minute);
+
+    // Distribute all feeds in time so that each is updated on its
+    // own time, but with the same interval.
+    let currentIndex = -1;
+    for (;;) {
+      if (feeds.length == 0) {
+        process.stderr.write("No feeds to process.\n");
+        process.exit(1);
+      }
+      await sleep((12 * time.Minute) / feeds.length);
+      currentIndex = (currentIndex + 1) % feeds.length;
+      const sub = feeds[currentIndex];
+      log(`updading ${sub}`);
+      try {
+        await updateFeed(sub, config, sendlog);
+      } catch (error) {
+        log(`error: ${sub}: ${error.message}`);
+      }
     }
-  }
+  });
 }
 
 // Makes a single update from the given feed,
