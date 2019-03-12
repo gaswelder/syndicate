@@ -3,19 +3,9 @@ const fs = require("fs");
 const Feed = require("./feed");
 const SendLog = require("./sendlog");
 const args = require("./args");
+const log = require("./log");
 
 const sleep = ms => new Promise(done => setTimeout(done, ms));
-
-function stamp() {
-  return new Date()
-    .toISOString()
-    .split(".")[0]
-    .replace("T", " ");
-}
-
-function log(msg) {
-  process.stdout.write(stamp() + "\t" + msg + "\n");
-}
 
 function readFeeds() {
   const urls = fs
