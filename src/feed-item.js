@@ -3,7 +3,8 @@ class FeedItem {
     this.data = data;
   }
 
-  // Returns the feed item's stable identifier.
+  // Returns the post's stable identifier.
+  // Stable means it shouldn't change over time.
   id() {
     const item = this.data;
     const onlyString = x => (typeof x == "string" ? x : null);
@@ -15,15 +16,18 @@ class FeedItem {
     return id;
   }
 
+  // Returns the post's title.
   title() {
     return this.data.title;
   }
 
+  // Returns the post's attachment URL, if it exists.
   attachment() {
     if (!this.data.enclosure) return null;
     return this.data.enclosure;
   }
 
+  // Returns the post's web link ("read online").
   link() {
     const link = this.data.link;
     // Some feeds omit schema from the URL.

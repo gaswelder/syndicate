@@ -6,6 +6,7 @@ class Feed {
     this.url = url;
   }
 
+  // Private.
   async data() {
     if (!this.cache) {
       // Some servers insist that they serve application/xml
@@ -24,10 +25,12 @@ class Feed {
     return this.cache;
   }
 
+  // Returns the current list of feed's posts.
   async list() {
     return (await this.data()).items.map(i => new FeedItem(i));
   }
 
+  // Returns the feed's title.
   async title() {
     return (await this.data()).title;
   }
