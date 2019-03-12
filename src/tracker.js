@@ -7,6 +7,9 @@ const log = require("./log");
 
 const sleep = ms => new Promise(done => setTimeout(done, ms));
 
+/**
+ * Reads feeds list from disk.
+ */
 function readFeeds() {
   const urls = fs
     .readFileSync("./feeds.txt")
@@ -14,7 +17,7 @@ function readFeeds() {
     .split("\n")
     .map(s => s.trim())
     .filter(s => s.length > 0);
-  return urls;
+  return [...new Set(urls).values()];
 }
 
 function readConfig() {
