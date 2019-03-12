@@ -30,30 +30,46 @@ function readConfig() {
   return JSON.parse(fs.readFileSync("./config.json").toString());
 }
 
+const time = {
+  Minute: 60 * 1000,
+  Hour: 3600 * 1000
+};
+
 // The main function just launches a separate tracker
 // for each defined RSS feed.
-function main() {
+async function main() {
   let config = readConfig();
   let feeds = readFeeds();
   const sendlog = new SendLog(config.sendlog_path);
 
-  for (const sub of feeds) {
-    track(sub, config, sendlog);
+  // First update all feeds at once.
+  for (const feed of feeds) {
+    await updateFeed(feed, config, sendlog);
   }
-}
 
-// Continuously tracks a single feed.
-async function track(sub, config, sendlog) {
+  // Reread the feeds list from time to time so that we don't
+  // have to stop the process to add or remove a feed.
+  setInterval(function() {
+    feeds = readFeeds();
+  }, 10 * time.Minute);
+
+  // Distribute all feeds in time so that each is updated on its
+  // own time, but with the same interval.
+  let currentIndex = -1;
   for (;;) {
+    if (feeds.length == 0) {
+      process.stderr.write("No feeds to process.\n");
+      process.exit(1);
+    }
+    await sleep((12 * time.Minute) / feeds.length);
+    currentIndex = (currentIndex + 1) % feeds.length;
+    const sub = feeds[currentIndex];
+    log(`updading ${sub}`);
     try {
       await updateFeed(sub, config, sendlog);
     } catch (error) {
       log(`error: ${sub}: ${error.message}`);
     }
-
-    // Spread feed updates in time to avoid load spikes.
-    const delay = Math.round((12 + (Math.random() - 0.5)) * 100) / 100;
-    await sleep(delay * 3600 * 1000);
   }
 }
 
