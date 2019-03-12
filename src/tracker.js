@@ -56,7 +56,6 @@ function main() {
         process.stderr.write("No feeds to process.\n");
         process.exit(1);
       }
-      await sleep((12 * time.Minute) / feeds.length);
       currentIndex = (currentIndex + 1) % feeds.length;
       const sub = feeds[currentIndex];
       log(`updading ${sub}`);
@@ -65,6 +64,7 @@ function main() {
       } catch (error) {
         log(`error: ${sub}: ${error.message}`);
       }
+      await sleep((12 * time.Minute) / feeds.length);
     }
   });
 }
