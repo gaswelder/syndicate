@@ -16,12 +16,28 @@ function log(msg) {
   process.stdout.write(stamp() + "\t" + msg + "\n");
 }
 
+function readFeeds() {
+  const urls = fs
+    .readFileSync("./feeds.txt")
+    .toString()
+    .split("\n")
+    .map(s => s.trim())
+    .filter(s => s.length > 0);
+  return urls;
+}
+
+function readConfig() {
+  return JSON.parse(fs.readFileSync("./config.json").toString());
+}
+
 // The main function just launches a separate tracker
 // for each defined RSS feed.
 function main() {
-  const config = JSON.parse(fs.readFileSync("./config.json").toString());
+  let config = readConfig();
+  let feeds = readFeeds();
   const sendlog = new SendLog(config.sendlog_path);
-  for (const sub of config.feeds) {
+
+  for (const sub of feeds) {
     track(sub, config, sendlog);
   }
 }

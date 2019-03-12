@@ -10,6 +10,5 @@
       "to": "joe@localhost"
     }
   },
-  "feeds": ["http://feeds.twit.tv/sn.xml"],
   "sendlog_path": "sendlog"
 }
