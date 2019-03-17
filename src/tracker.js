@@ -64,7 +64,7 @@ function main() {
       } catch (error) {
         log(`error: ${sub}: ${error.message}`);
       }
-      await sleep((12 * time.Minute) / feeds.length);
+      await sleep((12 * time.Hour) / feeds.length);
     }
   });
 }
