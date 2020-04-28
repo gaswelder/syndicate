@@ -86,24 +86,18 @@ async function updateFeed(sub, config, sendlog) {
 }
 
 // title, link, pubDate, content, enclosure{url, length, type}
-function send(message, feed, config) {
-  return new Promise(async (ok, fail) => {
-    const transporter = nodemailer.createTransport(config.mailer.transport);
-    const subject = `${await feed.title()}: ${message.title()}`;
-    log(subject);
-    const mail = Object.assign({}, config.mailer.mail, {
-      subject,
-      headers: {
-        Date: message.pubDate,
-      },
-      html: message.toHTML(),
-    });
-
-    transporter.sendMail(mail, (error, info) => {
-      if (error) return fail(error);
-      ok(info);
-    });
+async function send(message, feed, config) {
+  const transporter = nodemailer.createTransport(config.mailer.transport);
+  const subject = `${await feed.title()}: ${message.title()}`;
+  log(subject);
+  const mail = Object.assign({}, config.mailer.mail, {
+    subject,
+    headers: {
+      Date: message.pubDate,
+    },
+    html: message.toHTML(),
   });
+  return transporter.sendMail(mail);
 }
 
 module.exports = main;
