@@ -5,12 +5,12 @@ const feeds = [
   "https://murze.be/feed",
   "http://feeds.twit.tv/sn.xml",
   "https://changelog.com/gotime/feed",
-  "https://research.swtch.com/feed.atom"
-].map(url => new Feed(url));
+  "https://research.swtch.com/feed.atom",
+].map((url) => new Feed(url));
 
-describe("should get non-empty list for every feed", function() {
+describe("should get non-empty list for every feed", function () {
   for (const f of feeds) {
-    it(f.url, async function() {
+    it(f.url, async function () {
       this.timeout(10000);
       const items = await f.list();
       assert.ok(items.length > 0);
@@ -18,8 +18,8 @@ describe("should get non-empty list for every feed", function() {
   }
 });
 
-describe("item id", function() {
-  it("should be unique", async function() {
+describe("item id", function () {
+  it("should be unique", async function () {
     const ids = [];
     for (const f of feeds) {
       const items = await f.list();
@@ -31,8 +31,8 @@ describe("item id", function() {
   });
 });
 
-describe("item", function() {
-  it("should have canonical url", async function() {
+describe("item", function () {
+  it("should have canonical url", async function () {
     const feed = new Feed("http://blog.golang.org/feed.atom");
     const items = await feed.list();
     for (const item of items) {
@@ -40,13 +40,13 @@ describe("item", function() {
     }
   });
 
-  it("should return attachment url", async function() {
+  it("should return attachment url", async function () {
     const feed = new Feed("http://feeds.feedburner.com/se-radio");
     const items = await feed.list();
-    assert.ok(items.some(i => i.attachment() !== null));
+    assert.ok(items.some((i) => i.attachment() !== null));
   });
 
-  it("should return tags", async function() {
+  it("should return tags", async function () {
     const feed = feeds[0];
     const items = await feed.list();
     const tags = items[0].tags();
@@ -54,7 +54,7 @@ describe("item", function() {
     assert.ok(tags.length > 0);
   });
 
-  it("should return an html rendering", async function() {
+  it("should return an html rendering", async function () {
     const feed = feeds[0];
     const items = await feed.list();
     const post = items[0];

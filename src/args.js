@@ -1,14 +1,14 @@
 const params = {};
 const info = {};
 
-const isFlag = arg => arg in params && typeof params[arg] == "boolean";
-const isParam = arg => arg in params && typeof params[arg] != "boolean";
+const isFlag = (arg) => arg in params && typeof params[arg] == "boolean";
+const isParam = (arg) => arg in params && typeof params[arg] != "boolean";
 
 /**
  * Defines a flag (a set/noset argument).
  * @returns {exports}
  */
-exports.flag = function(name, description) {
+exports.flag = function (name, description) {
   params[name] = false;
   info[name] = description;
   return this;
@@ -18,7 +18,7 @@ exports.flag = function(name, description) {
  * Defines an argument with a parameter.
  * @returns {exports}
  */
-exports.param = function(name, defaultValue, description) {
+exports.param = function (name, defaultValue, description) {
   params[name] = defaultValue;
   info[name] = { defaultValue, description };
   return this;
@@ -30,7 +30,7 @@ exports.param = function(name, defaultValue, description) {
  * @param {function} main
  * @returns {exports}
  */
-exports.parse = function(main) {
+exports.parse = function (main) {
   const args = process.argv.slice(2);
   try {
     const [flagsList, rest] = group(args);
@@ -48,7 +48,7 @@ exports.parse = function(main) {
  * Returns a reference of defined flags and parameters as a string.
  * @returns {string}
  */
-exports.reference = function() {
+exports.reference = function () {
   const lines = [];
   for (const k in params) {
     const desc = isParam(k)

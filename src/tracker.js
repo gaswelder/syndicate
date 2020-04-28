@@ -5,7 +5,7 @@ const SendLog = require("./sendlog");
 const args = require("./args");
 const log = require("./log");
 
-const sleep = ms => new Promise(done => setTimeout(done, ms));
+const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
 
 /**
  * Reads feeds list from disk.
@@ -15,8 +15,8 @@ function readFeeds() {
     .readFileSync("./feeds.txt")
     .toString()
     .split("\n")
-    .map(s => s.trim())
-    .filter(s => s.length > 0);
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
   return [...new Set(urls).values()];
 }
 
@@ -26,11 +26,11 @@ function readConfig() {
 
 const time = {
   Minute: 60 * 1000,
-  Hour: 3600 * 1000
+  Hour: 3600 * 1000,
 };
 
 function main() {
-  args.flag("a", "update all feeds on startup").parse(async function(params) {
+  args.flag("a", "update all feeds on startup").parse(async function (params) {
     let config = readConfig();
     let feeds = readFeeds();
     const sendlog = new SendLog(config.sendlog_path);
@@ -44,7 +44,7 @@ function main() {
 
     // Reread the feeds list from time to time so that we don't
     // have to stop the process to add or remove a feed.
-    setInterval(function() {
+    setInterval(function () {
       feeds = readFeeds();
     }, 10 * time.Minute);
 
@@ -75,7 +75,7 @@ async function updateFeed(sub, config, sendlog) {
   const feed = new Feed(sub);
   const items = await feed.list();
 
-  const newItems = items.filter(function(item) {
+  const newItems = items.filter(function (item) {
     return !sendlog.has(item.id());
   });
   log(`${await feed.title()}: ${newItems.length} new`);
@@ -94,9 +94,9 @@ function send(message, feed, config) {
     const mail = Object.assign({}, config.mailer.mail, {
       subject,
       headers: {
-        Date: message.pubDate
+        Date: message.pubDate,
       },
-      html: message.toHTML()
+      html: message.toHTML(),
     });
 
     transporter.sendMail(mail, (error, info) => {

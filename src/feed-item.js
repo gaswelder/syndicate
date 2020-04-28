@@ -7,10 +7,10 @@ class FeedItem {
   // Stable means it shouldn't change over time.
   id() {
     const item = this.data;
-    const onlyString = x => (typeof x == "string" ? x : null);
+    const onlyString = (x) => (typeof x == "string" ? x : null);
     const id = [item.guid, item.id, item.link]
       .map(onlyString)
-      .filter(x => x)[0];
+      .filter((x) => x)[0];
 
     if (!id) throw new Error("can't find message id in the data");
     return id;
@@ -41,7 +41,7 @@ class FeedItem {
   // Returns the post's tags, if any, as array of strings.
   tags() {
     if (!this.data.categories) return [];
-    return this.data.categories.map(e => (e.$ ? e.$.term : e));
+    return this.data.categories.map((e) => (e.$ ? e.$.term : e));
   }
 
   // Returns HTML email body for the given RSS item.

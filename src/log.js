@@ -1,8 +1,5 @@
 function stamp() {
-  return new Date()
-    .toISOString()
-    .split(".")[0]
-    .replace("T", " ");
+  return new Date().toISOString().split(".")[0].replace("T", " ");
 }
 
 function log(msg) {

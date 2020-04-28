@@ -11,10 +11,7 @@ class SendLog {
       this.set = new Set();
       return;
     }
-    const items = fs
-      .readFileSync(this.filepath)
-      .toString()
-      .split("\n");
+    const items = fs.readFileSync(this.filepath).toString().split("\n");
     this.set = new Set(items);
   }
 

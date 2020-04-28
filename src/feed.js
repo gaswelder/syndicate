@@ -14,11 +14,11 @@ class Feed {
       // default application/rss+xml.
       const parser = new rssParser({
         headers: {
-          Accept: "application/rss+xml, application/xml"
+          Accept: "application/rss+xml, application/xml",
         },
         customFields: {
-          item: ["summary", ["category", "categories", { keepArray: true }]]
-        }
+          item: ["summary", ["category", "categories", { keepArray: true }]],
+        },
       });
       this.cache = await parser.parseURL(this.url);
     }
@@ -27,7 +27,7 @@ class Feed {
 
   // Returns the current list of feed's posts.
   async list() {
-    return (await this.data()).items.map(i => new FeedItem(i));
+    return (await this.data()).items.map((i) => new FeedItem(i));
   }
 
   // Returns the feed's title.
