@@ -85,6 +85,9 @@ async function updateFeed(url, config, state) {
   const newIds = state.addedItems(url, ids);
   const newItems = items.filter((item) => newIds.includes(item.id()));
   log(`${await feed.title()}: ${newItems.length} new`);
+  if (newItems.length == 0) {
+    return;
+  }
 
   // send all items
   newItems.sort((a, b) => a.pubDate().getTime() - b.pubDate().getTime());

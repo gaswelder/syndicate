@@ -1,5 +1,7 @@
 const fs = require("fs");
 
+const ts = () => new Date().toISOString();
+
 const addedItems = (state, url, newItems) => {
   const feed = state.find((x) => x.url == url);
   if (!feed) {
@@ -11,7 +13,7 @@ const addedItems = (state, url, newItems) => {
 
 const updateItems = (state, url, newItems) => [
   ...state.filter((x) => x.url != url),
-  { url, items: newItems },
+  { url, updatedAt: ts(), items: newItems },
 ];
 
 const migrate = (sendlog, urls) => urls.map((url) => ({ url, items: sendlog }));
