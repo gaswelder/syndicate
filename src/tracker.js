@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 const fs = require("fs");
 const Feed = require("./feed");
-const SendLog = require("./sendlog");
+const State = require("./state");
 const args = require("./args");
 const log = require("./log");
 
@@ -32,12 +32,12 @@ const time = {
 function main() {
   args.flag("a", "update all feeds on startup").parse(async function (params) {
     let config = readConfig();
-    let feeds = readFeeds();
-    const sendlog = new SendLog(config.sendlog_path);
+    let feedURLs = readFeeds();
+    const sendlog = new State(config.sendlog_path, feedURLs);
 
     // Update all feeds at once if the flag is given.
     if (params.a) {
-      for (const feed of feeds) {
+      for (const feed of feedURLs) {
         await updateFeed(feed, config, sendlog);
       }
     }
@@ -45,44 +45,54 @@ function main() {
     // Reread the feeds list from time to time so that we don't
     // have to stop the process to add or remove a feed.
     setInterval(function () {
-      feeds = readFeeds();
+      feedURLs = readFeeds();
     }, 10 * time.Minute);
 
     // Distribute all feeds in time so that each is updated on its
     // own time, but with the same interval.
     let currentIndex = -1;
     for (;;) {
-      if (feeds.length == 0) {
+      if (feedURLs.length == 0) {
         process.stderr.write("No feeds to process.\n");
         process.exit(1);
       }
-      currentIndex = (currentIndex + 1) % feeds.length;
-      const sub = feeds[currentIndex];
+      currentIndex = (currentIndex + 1) % feedURLs.length;
+      const sub = feedURLs[currentIndex];
       log(`updading ${sub}`);
       try {
         await updateFeed(sub, config, sendlog);
       } catch (error) {
         log(`error: ${sub}: ${error.message}`);
       }
-      await sleep((12 * time.Hour) / feeds.length);
+      await sleep((12 * time.Hour) / feedURLs.length);
     }
   });
 }
 
-// Makes a single update from the given feed,
-// sending the new items to the email.
-async function updateFeed(sub, config, sendlog) {
-  const feed = new Feed(sub);
+/**
+ * Updages given feed, sends new items to email.
+ *
+ * @param {string} url
+ * @param {*} config
+ * @param {Sendlog} state
+ */
+async function updateFeed(url, config, state) {
+  const feed = new Feed(url);
   const items = await feed.list();
+  const ids = items.map((x) => x.id());
 
-  const newItems = items.filter(function (item) {
-    return !sendlog.has(item.id());
-  });
+  // see what items are new
+  const newIds = state.addedItems(url, ids);
+  const newItems = items.filter((item) => newIds.includes(item.id()));
   log(`${await feed.title()}: ${newItems.length} new`);
+
+  // send all items
   for (const item of newItems) {
     await send(item, feed, config);
-    sendlog.add(item.id());
   }
+
+  // update the feed's state
+  state.updateItems(url, ids);
 }
 
 // title, link, pubDate, content, enclosure{url, length, type}
