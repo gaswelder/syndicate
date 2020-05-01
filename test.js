@@ -40,6 +40,14 @@ describe("item", function () {
     }
   });
 
+  it("should return a publication date", async function () {
+    const feed = feeds[0];
+    const [item] = await feed.list();
+    const pubDate = item.pubDate();
+    assert.ok(pubDate instanceof Date);
+    assert.ok(!isNaN(pubDate.getTime()));
+  });
+
   it("should return attachment url", async function () {
     const feed = new Feed("http://feeds.feedburner.com/se-radio");
     const items = await feed.list();

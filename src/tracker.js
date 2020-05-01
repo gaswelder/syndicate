@@ -87,6 +87,7 @@ async function updateFeed(url, config, state) {
   log(`${await feed.title()}: ${newItems.length} new`);
 
   // send all items
+  newItems.sort((a, b) => a.pubDate().getTime() - b.pubDate().getTime());
   for (const item of newItems) {
     await send(item, feed, config);
   }
@@ -95,17 +96,16 @@ async function updateFeed(url, config, state) {
   state.updateItems(url, ids);
 }
 
-// title, link, pubDate, content, enclosure{url, length, type}
-async function send(message, feed, config) {
+async function send(item, feed, config) {
   const transporter = nodemailer.createTransport(config.mailer.transport);
-  const subject = `${await feed.title()}: ${message.title()}`;
+  const subject = `${await feed.title()}: ${item.title()}`;
   log(subject);
   const mail = Object.assign({}, config.mailer.mail, {
     subject,
     headers: {
-      Date: message.pubDate,
+      Date: item.pubDate(),
     },
-    html: message.toHTML(),
+    html: item.toHTML(),
   });
   return transporter.sendMail(mail);
 }

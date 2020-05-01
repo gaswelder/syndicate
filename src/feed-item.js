@@ -16,6 +16,10 @@ class FeedItem {
     return id;
   }
 
+  pubDate() {
+    return new Date(this.data.pubDate);
+  }
+
   // Returns the post's title.
   title() {
     return this.data.title;
