@@ -15,7 +15,8 @@
   "license": "MIT",
   "dependencies": {
     "nodemailer": "^4.6.8",
-    "rss-parser": "^3.4.3"
+    "rss-parser": "^3.4.3",
+    "time-consts": "^1.0.5"
   },
   "devDependencies": {
     "mocha": "^5.2.0"

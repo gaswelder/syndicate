@@ -4,6 +4,7 @@ const Feed = require("./feed");
 const State = require("./state");
 const args = require("./args");
 const log = require("./log");
+const time = require("time-consts");
 
 const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
 
@@ -24,11 +25,6 @@ function readConfig() {
   return JSON.parse(fs.readFileSync("./config.json").toString());
 }
 
-const time = {
-  Minute: 60 * 1000,
-  Hour: 3600 * 1000,
-};
-
 function main() {
   args.flag("a", "update all feeds on startup").parse(async function (params) {
     let config = readConfig();
@@ -46,7 +42,7 @@ function main() {
     // have to stop the process to add or remove a feed.
     setInterval(function () {
       feedURLs = readFeeds();
-    }, 10 * time.Minute);
+    }, 10 * time.MINUTE);
 
     // Distribute all feeds in time so that each is updated on its
     // own time, but with the same interval.
@@ -64,7 +60,7 @@ function main() {
       } catch (error) {
         log(`error: ${sub}: ${error.message}`);
       }
-      await sleep((12 * time.Hour) / feedURLs.length);
+      await sleep((12 * time.HOUR) / feedURLs.length);
     }
   });
 }
