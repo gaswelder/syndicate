@@ -25,44 +25,44 @@ function readConfig() {
   return JSON.parse(fs.readFileSync("./config.json").toString());
 }
 
-function main() {
-  args.flag("a", "update all feeds on startup").parse(async function (params) {
-    let config = readConfig();
-    let feedURLs = readFeeds();
-    const sendlog = new State(config.sendlog_path, feedURLs);
+async function main() {
+  const [params] = args.flag("a", "update all feeds on startup").parse();
 
-    // Update all feeds at once if the flag is given.
-    if (params.a) {
-      for (const feed of feedURLs) {
-        await updateFeed(feed, config, sendlog);
-      }
+  let config = readConfig();
+  let feedURLs = readFeeds();
+  const sendlog = new State(config.sendlog_path, feedURLs);
+
+  // Update all feeds at once if the flag is given.
+  if (params.a) {
+    for (const feed of feedURLs) {
+      await updateFeed(feed, config, sendlog);
     }
+  }
 
-    // Reread the feeds list from time to time so that we don't
-    // have to stop the process to add or remove a feed.
-    setInterval(function () {
-      feedURLs = readFeeds();
-    }, 10 * time.MINUTE);
+  // Reread the feeds list from time to time so that we don't
+  // have to stop the process to add or remove a feed.
+  setInterval(function () {
+    feedURLs = readFeeds();
+  }, 10 * time.MINUTE);
 
-    // Distribute all feeds in time so that each is updated on its
-    // own time, but with the same interval.
-    let currentIndex = -1;
-    for (;;) {
-      if (feedURLs.length == 0) {
-        process.stderr.write("No feeds to process.\n");
-        process.exit(1);
-      }
-      currentIndex = (currentIndex + 1) % feedURLs.length;
-      const sub = feedURLs[currentIndex];
-      log(`updading ${sub}`);
-      try {
-        await updateFeed(sub, config, sendlog);
-      } catch (error) {
-        log(`error: ${sub}: ${error.message}`);
-      }
-      await sleep((12 * time.HOUR) / feedURLs.length);
+  // Distribute all feeds in time so that each is updated on its
+  // own time, but with the same interval.
+  let currentIndex = -1;
+  for (;;) {
+    if (feedURLs.length == 0) {
+      process.stderr.write("No feeds to process.\n");
+      process.exit(1);
     }
-  });
+    currentIndex = (currentIndex + 1) % feedURLs.length;
+    const sub = feedURLs[currentIndex];
+    log(`updading ${sub}`);
+    try {
+      await updateFeed(sub, config, sendlog);
+    } catch (error) {
+      log(`error: ${sub}: ${error.message}`);
+    }
+    await sleep((12 * time.HOUR) / feedURLs.length);
+  }
 }
 
 /**

@@ -27,10 +27,10 @@ exports.param = function (name, defaultValue, description) {
 /**
  * Parses the command line arguments and calls `main` with
  * a result object and the rest of the arguments.
- * @param {function} main
- * @returns {exports}
+ *
+ * @returns {[object, array]} params and arguments
  */
-exports.parse = function (main) {
+exports.parse = function () {
   const args = process.argv.slice(2);
   try {
     const [flagsList, rest] = group(args);
@@ -38,9 +38,10 @@ exports.parse = function (main) {
     for (const [k, v] of flagsList) {
       result[k] = v;
     }
-    main(result, rest);
+    return [result, rest];
   } catch (e) {
     process.stderr.write(e + "\n" + this.reference() + "\n");
+    process.exit(1);
   }
 };
 
