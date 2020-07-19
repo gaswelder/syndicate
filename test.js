@@ -55,7 +55,7 @@ describe("item", function () {
   });
 
   it("should return tags", async function () {
-    const feed = feeds[0];
+    const feed = feeds[1];
     const items = await feed.list();
     const tags = items[0].tags();
     assert.ok(Array.isArray(tags));
