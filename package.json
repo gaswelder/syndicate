@@ -14,12 +14,12 @@
   "author": "gaswelder",
   "license": "MIT",
   "dependencies": {
-    "nodemailer": "^4.6.8",
-    "rss-parser": "^3.4.3",
+    "nodemailer": "^4.7.0",
+    "rss-parser": "^3.8.0",
     "time-consts": "^1.0.5"
   },
   "devDependencies": {
     "eslint": "^7.5.0",
-    "mocha": "^5.2.0"
+    "mocha": "^8.0.1"
   }
 }
