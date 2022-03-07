@@ -23,6 +23,13 @@ Create `config.json` with the contents in the following format:
 }
 ```
 
-Then create `feeds.txt` with the list of feed URLs (one line per URL).
+Run `node index.js testmail` to verify the config by sending a test mail.
 
-Then run `node index.js`.
+Create `feeds.txt` with the list of feed URLs (one line per URL):
+
+```
+http://blog.golang.org/feed.atom
+https://reactjs.org/feed.xml
+```
+
+Run `node index.js` as a daemon to monitor the feeds.

@@ -26,9 +26,16 @@ function readConfig() {
 }
 
 async function main() {
+  let config = readConfig();
+
+  if (process.argv[2] == "testmail") {
+    await sendmail(config, "test mail", {}, "Hello, this is a test mail");
+    console.log("Sent a test mail to " + config.mailer.mail.to);
+    return;
+  }
+
   const [params] = args.flag("a", "update all feeds on startup").parse();
 
-  let config = readConfig();
   let feedURLs = readFeeds();
   const sendlog = new State(config.sendlog_path, feedURLs);
 
@@ -88,25 +95,23 @@ async function updateFeed(url, config, state) {
   // send all items
   newItems.sort((a, b) => a.pubDate().getTime() - b.pubDate().getTime());
   for (const item of newItems) {
-    await send(item, feed, config);
+    const subject = `${await feed.title()}: ${item.title()}`;
+    log(subject);
+    await sendmail(config, subject, { Date: item.pubDate() }, item.toHTML());
   }
 
   // update the feed's state
   state.updateItems(url, ids);
 }
 
-async function send(item, feed, config) {
+const sendmail = async (config, subject, headers, html) => {
   const transporter = nodemailer.createTransport(config.mailer.transport);
-  const subject = `${await feed.title()}: ${item.title()}`;
-  log(subject);
-  const mail = Object.assign({}, config.mailer.mail, {
+  return transporter.sendMail({
+    ...config.mailer.mail,
     subject,
-    headers: {
-      Date: item.pubDate(),
-    },
-    html: item.toHTML(),
+    headers,
+    html,
   });
-  return transporter.sendMail(mail);
-}
+};
 
 module.exports = main;
