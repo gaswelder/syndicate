@@ -3,7 +3,6 @@ const fs = require("fs");
 const Feed = require("./feed");
 const State = require("./state");
 const args = require("./args");
-const log = require("./log");
 const time = require("time-consts");
 
 const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
@@ -62,7 +61,6 @@ async function main() {
     }
     currentIndex = (currentIndex + 1) % feedURLs.length;
     const sub = feedURLs[currentIndex];
-    log(`updading ${sub}`);
     try {
       await updateFeed(sub, config, sendlog);
     } catch (error) {
@@ -113,5 +111,9 @@ const sendmail = async (config, subject, headers, html) => {
     html,
   });
 };
+
+function log(msg) {
+  process.stdout.write(msg + "\n");
+}
 
 module.exports = main;
