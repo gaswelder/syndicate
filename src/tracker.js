@@ -64,7 +64,7 @@ async function main() {
     try {
       await updateFeed(sub, config, sendlog);
     } catch (error) {
-      log(`error: ${sub}: ${error.message}`);
+      log.error(`${sub}: ${error.message}`);
     }
     await sleep((12 * time.HOUR) / feedURLs.length);
   }
@@ -85,7 +85,7 @@ async function updateFeed(url, config, state) {
   // see what items are new
   const newIds = state.addedItems(url, ids);
   const newItems = items.filter((item) => newIds.includes(item.id()));
-  log(`${await feed.title()}: ${newItems.length} new`);
+  log.info(`${await feed.title()}: ${newItems.length} new`);
   if (newItems.length == 0) {
     return;
   }
@@ -94,7 +94,7 @@ async function updateFeed(url, config, state) {
   newItems.sort((a, b) => a.pubDate().getTime() - b.pubDate().getTime());
   for (const item of newItems) {
     const subject = `${await feed.title()}: ${item.title()}`;
-    log(subject);
+    log.info(subject);
     await sendmail(config, subject, { Date: item.pubDate() }, item.toHTML());
   }
 
@@ -112,8 +112,17 @@ const sendmail = async (config, subject, headers, html) => {
   });
 };
 
-function log(msg) {
-  process.stdout.write(msg + "\n");
-}
+const log = {
+  error(msg) {
+    process.stdout.write(
+      JSON.stringify({ level: "error", msg, t: new Date().toISOString() })
+    );
+  },
+  info(msg) {
+    process.stdout.write(
+      JSON.stringify({ level: "info", msg, t: new Date().toISOString() })
+    );
+  },
+};
 
 module.exports = main;
