@@ -16,7 +16,7 @@ function readFeeds() {
     .toString()
     .split("\n")
     .map((s) => s.trim())
-    .filter((s) => s.length > 0);
+    .filter((s) => s.length > 0 && !s.startsWith("#"));
   return [...new Set(urls).values()];
 }
 
