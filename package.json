@@ -3,7 +3,7 @@
   "version": "0.1.1",
   "description": "Forwards RSS items to email",
   "homepage": "https://github.com/gaswelder/syndicate",
-  "main": "index.js",
+  "main": "index.mjs",
   "scripts": {
     "test": "mocha test.js"
   },
