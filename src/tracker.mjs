@@ -75,14 +75,12 @@ async function updateFeed(url, config, state) {
   // Download the feed.
   const feed = new Feed(url);
   const items = await feed.list();
+  const title = await feed.title();
 
   // Find the new items.
   const seenIds = state.getItems(url);
   const newItems = items.filter((item) => !seenIds.includes(item.id()));
   log.info(`${await feed.title()}: ${newItems.length} new`);
-  if (newItems.length == 0) {
-    return;
-  }
 
   // Send out the new items.
   newItems.sort((a, b) => a.pubDate().getTime() - b.pubDate().getTime());
@@ -90,6 +88,16 @@ async function updateFeed(url, config, state) {
     const subject = `${await feed.title()}: ${item.title()}`;
     log.info(subject);
     await sendmail(config, subject, { Date: item.pubDate() }, item.toHTML());
+  }
+
+  // Remove items that are not online anymore.
+  const onlineIds = new Set(items.map((x) => x.id()));
+  for (let i = 0; i < seenIds.length; i++) {
+    if (!onlineIds.has(seenIds[i])) {
+      log.info(`${title}: removing old ${seenIds[i]}`);
+      seenIds.splice(i, 1);
+      i--;
+    }
   }
 
   // Add the new items to the seen list.
