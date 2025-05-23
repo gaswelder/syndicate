@@ -1,4 +1,4 @@
-class FeedItem {
+export class FeedItem {
   constructor(data) {
     this.data = data;
   }
@@ -74,5 +74,3 @@ function itemContent(item) {
   if (item.summary) return item.summary._;
   return "";
 }
-
-module.exports = FeedItem;

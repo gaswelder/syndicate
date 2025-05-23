@@ -1,7 +1,7 @@
-const rssParser = require("rss-parser");
-const FeedItem = require("./feed-item");
+import rssParser from "rss-parser";
+import { FeedItem } from "./feed-item.mjs";
 
-class Feed {
+export class Feed {
   constructor(url) {
     this.url = url;
   }
@@ -35,5 +35,3 @@ class Feed {
     return (await this.data()).title;
   }
 }
-
-module.exports = Feed;

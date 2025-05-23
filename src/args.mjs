@@ -8,21 +8,21 @@ const isParam = (arg) => arg in params && typeof params[arg] != "boolean";
  * Defines a flag (a set/noset argument).
  * @returns {exports}
  */
-exports.flag = function (name, description) {
+export function flag(name, description) {
   params[name] = false;
   info[name] = description;
   return this;
-};
+}
 
 /**
  * Defines an argument with a parameter.
  * @returns {exports}
  */
-exports.param = function (name, defaultValue, description) {
+export function param(name, defaultValue, description) {
   params[name] = defaultValue;
   info[name] = { defaultValue, description };
   return this;
-};
+}
 
 /**
  * Parses the command line arguments and calls `main` with
@@ -30,7 +30,7 @@ exports.param = function (name, defaultValue, description) {
  *
  * @returns {[object, array]} params and arguments
  */
-exports.parse = function () {
+export function parse() {
   const args = process.argv.slice(2);
   try {
     const [flagsList, rest] = group(args);
@@ -43,13 +43,13 @@ exports.parse = function () {
     process.stderr.write(e + "\n" + this.reference() + "\n");
     process.exit(1);
   }
-};
+}
 
 /**
  * Returns a reference of defined flags and parameters as a string.
  * @returns {string}
  */
-exports.reference = function () {
+export function reference() {
   const lines = [];
   for (const k in params) {
     const desc = isParam(k)
@@ -58,7 +58,7 @@ exports.reference = function () {
     lines.push("\t" + desc);
   }
   return lines.join("\n");
-};
+}
 
 function group(args) {
   if (args.length == 0) return [[], []];

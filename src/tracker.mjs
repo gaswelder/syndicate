@@ -1,18 +1,16 @@
-const nodemailer = require("nodemailer");
-const fs = require("fs");
-const Feed = require("./feed");
-const State = require("./state");
-const args = require("./args");
-const time = require("time-consts");
-
-const sleep = (ms) => new Promise((done) => setTimeout(done, ms));
+import { readFileSync } from "fs";
+import { createTransport } from "nodemailer";
+import { HOUR, MINUTE } from "time-consts";
+import * as timers from "timers/promises";
+import * as args from "./args.mjs";
+import { Feed } from "./feed.mjs";
+import { State } from "./state.mjs";
 
 /**
  * Reads feeds list from disk.
  */
 function readFeeds() {
-  const urls = fs
-    .readFileSync("./feeds.txt")
+  const urls = readFileSync("./feeds.txt")
     .toString()
     .split("\n")
     .map((s) => s.trim())
@@ -21,10 +19,10 @@ function readFeeds() {
 }
 
 function readConfig() {
-  return JSON.parse(fs.readFileSync("./config.json").toString());
+  return JSON.parse(readFileSync("./config.json").toString());
 }
 
-async function main() {
+export async function main() {
   let config = readConfig();
 
   if (process.argv[2] == "testmail") {
@@ -33,7 +31,8 @@ async function main() {
     return;
   }
 
-  const [params] = args.flag("a", "update all feeds on startup").parse();
+  args.flag("a", "update all feeds on startup");
+  const [params] = args.parse();
 
   let feedURLs = readFeeds();
   const sendlog = new State(config.sendlog_path, feedURLs);
@@ -49,7 +48,7 @@ async function main() {
   // have to stop the process to add or remove a feed.
   setInterval(function () {
     feedURLs = readFeeds();
-  }, 10 * time.MINUTE);
+  }, 10 * MINUTE);
 
   // Distribute all feeds in time so that each is updated on its
   // own time, but with the same interval.
@@ -66,7 +65,7 @@ async function main() {
     } catch (error) {
       log.error(`${sub}: ${error.message}`);
     }
-    await sleep((12 * time.HOUR) / feedURLs.length);
+    await timers.setTimeout((12 * HOUR) / feedURLs.length);
   }
 }
 
@@ -103,7 +102,7 @@ async function updateFeed(url, config, state) {
 }
 
 const sendmail = async (config, subject, headers, html) => {
-  const transporter = nodemailer.createTransport(config.mailer.transport);
+  const transporter = createTransport(config.mailer.transport);
   return transporter.sendMail({
     ...config.mailer.mail,
     subject,
@@ -125,5 +124,3 @@ const log = {
     );
   },
 };
-
-module.exports = main;

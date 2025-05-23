@@ -1,4 +1,4 @@
-const fs = require("fs");
+import * as fs from "fs";
 
 const ts = () => new Date().toISOString();
 
@@ -33,7 +33,7 @@ const load = (filepath, urls) => {
 const save = (state, filepath) =>
   fs.writeFileSync(filepath, JSON.stringify(state, null, "\t"));
 
-class State {
+export class State {
   constructor(filepath, urls) {
     this.filepath = filepath;
     this.data = load(filepath, urls);
@@ -46,5 +46,3 @@ class State {
     save(this.data, this.filepath);
   }
 }
-
-module.exports = State;
