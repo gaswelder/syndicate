@@ -5,6 +5,7 @@ import * as timers from "timers/promises";
 import * as args from "./args.mjs";
 import { Feed } from "./feed.mjs";
 import { State } from "./state.mjs";
+import { log } from "./log.mjs";
 
 /**
  * Reads feeds list from disk.
@@ -44,14 +45,12 @@ export async function main() {
     }
   }
 
-  // Reread the feeds list from time to time so that we don't
-  // have to stop the process to add or remove a feed.
+  // Reread the feeds list from time to time.
   setInterval(function () {
     feedURLs = readFeeds();
   }, 10 * MINUTE);
 
-  // Distribute all feeds in time so that each is updated on its
-  // own time, but with the same interval.
+  // Loop through all feeds one by one, a full circle is 12 hours.
   let currentIndex = -1;
   for (;;) {
     if (feedURLs.length == 0) {
@@ -109,18 +108,4 @@ const sendmail = async (config, subject, headers, html) => {
     headers,
     html,
   });
-};
-
-const log = {
-  error(msg) {
-    process.stdout.write(
-      JSON.stringify({ level: "error", msg, t: new Date().toISOString() }) +
-        "\n"
-    );
-  },
-  info(msg) {
-    process.stdout.write(
-      JSON.stringify({ level: "info", msg, t: new Date().toISOString() }) + "\n"
-    );
-  },
 };
