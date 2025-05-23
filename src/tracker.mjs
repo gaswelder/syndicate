@@ -36,7 +36,7 @@ export async function main() {
   const [params] = args.parse();
 
   let feedURLs = readFeeds();
-  const sendlog = new State(config.sendlog_path, feedURLs);
+  const sendlog = new State(config.sendlog_path);
 
   // Update all feeds at once if the flag is given.
   if (params.a) {
@@ -69,26 +69,22 @@ export async function main() {
 }
 
 /**
- * Updages given feed, sends new items to email.
- *
- * @param {string} url
- * @param {*} config
- * @param {Sendlog} state
+ * Updates the given feed, sends new items to email.
  */
 async function updateFeed(url, config, state) {
+  // Download the feed.
   const feed = new Feed(url);
   const items = await feed.list();
-  const ids = items.map((x) => x.id());
 
-  // see what items are new
-  const newIds = state.addedItems(url, ids);
-  const newItems = items.filter((item) => newIds.includes(item.id()));
+  // Find the new items.
+  const seenIds = state.getItems(url);
+  const newItems = items.filter((item) => !seenIds.includes(item.id()));
   log.info(`${await feed.title()}: ${newItems.length} new`);
   if (newItems.length == 0) {
     return;
   }
 
-  // send all items
+  // Send out the new items.
   newItems.sort((a, b) => a.pubDate().getTime() - b.pubDate().getTime());
   for (const item of newItems) {
     const subject = `${await feed.title()}: ${item.title()}`;
@@ -96,8 +92,9 @@ async function updateFeed(url, config, state) {
     await sendmail(config, subject, { Date: item.pubDate() }, item.toHTML());
   }
 
-  // update the feed's state
-  state.updateItems(url, ids);
+  // Add the new items to the seen list.
+  seenIds.push(...newItems.map((x) => x.id()));
+  state.setItems(url, seenIds);
 }
 
 const sendmail = async (config, subject, headers, html) => {
